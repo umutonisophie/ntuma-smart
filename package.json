@@ -1,0 +1,17 @@
+{
+  "name": "ntuma-smart",
+  "version": "1.0.0",
+  "description": "Logistics platform for Nyabugogo market: retailer ordering, wholesaler stock, and fleet dispatch.",
+  "private": true,
+  "scripts": {
+    "test": "node ntuma.test.js",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "logistics",
+    "prototype",
+    "vanilla-javascript",
+    "rwanda"
+  ],
+  "license": "MIT"
+}

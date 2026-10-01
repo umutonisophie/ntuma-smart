@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTUMA SMART - Retailer Delivery</title>
+    <style>
+        /* CLEANED UP STATIC CSS - NO ERRORS, 100% OFFLINE */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding-bottom: 70px; }
+        .app-container { max-width: 450px; margin: 0 auto; min-height: 100vh; background-color: #ffffff; display: flex; position: relative; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; flex-direction: column; }
+        
+        header { background: #2563eb; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header h1 { font-size: 20px; font-weight: bold; letter-spacing: -0.5px; }
+        header p { font-size: 11px; color: #bfdbfe; margin-top: 2px; }
+        .badge { background-color: #f59e0b; color: white; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        
+        main { padding: 16px; flex-grow: 1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .info-banner { background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 12px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; line-height: 1.4; }
+        .card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h3 { font-size: 14px; font-weight: bold; color: #1f2937; margin-bottom: 4px; }
+        .card p { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+        
+        /* Retailer Input Fields Setup */
+        .item-input-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        .input-row { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; font-size: 13px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; background-color: #fff; }
+        textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+        
+        .primary-btn { width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .primary-btn:hover { background-color: #1d4ed8; }
+        
+        .mic-btn-record { width: 100%; background-color: #ef4444; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .mic-recording-active { background-color: #16a34a !important; animation: pulse 1.5s infinite; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+        .form-group label { display: block; font-size: 9px; text-transform: uppercase; font-weight: bold; color: #6b7280; margin-bottom: 4px; }
+        
+        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+        .remove-item { color: #ef4444; background: none; border: none; font-weight: bold; margin-left: 8px; cursor: pointer; }
+        
+        .checkout-footer { border-top: 1px solid #f3f4f6; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .submit-btn { background-color: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .submit-btn:hover { background-color: #15803d; }
+
+        .status-badge { background-color: #dcfce7; color: #15803d; font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .status-badge.low { background-color: #fee2e2; color: #b91c1c; }
+        .list-item-bulk { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; font-family: monospace; }
+        .map-box { width: 100%; height: 120px; background-color: #e5e7eb; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px; font-weight: bold; color: #4b5563; font-size: 13px; border: 1px solid #d1d5db; }
+        
+        nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background: white; border-top: 1px solid #e5e7eb; display: grid; grid-template-columns: 1fr 1fr 1fr; height: 60px; z-index: 100; }
+        .nav-btn { background: none; border: none; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; font-weight: 600; color: #6b7280; cursor: pointer; }
+        .nav-btn.active { color: #2563eb; border-top: 3px solid #2563eb; }
+        .nav-emoji { font-size: 20px; margin-bottom: 2px; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header>
+            <div>
+                <h1>NTUMA SMART</h1>
+                <p>No more Nyabugogo trips. We deliver.</p>
+            </div>
+            <div class="badge">☀️ Sun is out</div>
+        </header>
+
+        <!-- MAIN INTERACTIVE APP SCREENS -->
+        <main>
+
+            <!-- PERSONA 1: RETAILER MOBILE APP VIEW -->
+            <div id="retailer-view" class="tab-content active">
+                <div class="info-banner">
+                    📢 Type the exact items you need below. Our truck will find them at Nyabugogo!
+                </div>
+
+                <!-- NEW COMPONENT: Retailer Manual Custom Item Input Form -->
+                <div class="card">
+                    <h3>➕ Add Goods Needed</h3>
+                    <p>Enter the commodity details and quantities required for your shop.</p>
+                    
+                    <div class="item-input-box">
+                        <div class="input-row">
+                            <input type="text" id="custom-item-name" placeholder="Item name (e.g., Pakistan Rice, Sugar)">
+                            <input type="number" id="custom-item-qty" placeholder="Qty" min="1" value="1">
+                        </div>
+                        <textarea id="custom-item-notes" placeholder="Optional notes: Specific brand, package size, or wholesale shop name..."></textarea>
+                        <button onclick="addCustomItemToList()" class="primary-btn">+ Add Item to Order List</button>
+                    </div>
+                </div>
+
+                <!-- Illiteracy Workaround Alternative -->
+                <div class="card">
+                    <h3>🎙️ Alternative: Quick Voice Order</h3>
+                    <button id="mic-btn" onclick="toggleMic()" class="mic-btn-record">
+                        <span id="mic-icon">🎤</span> <span id="mic-text">Press to Record Order</span>
+                    </button>
+                </div>
+
+                <!-- Checkout Card Summary Screen -->
+                <div class="card">
+                    <h3>📝 Current Request Manifest</h3>
+                    <div id="cart-items" style="font-size: 12px; margin: 10px 0;">
+                        <p style="color: #9ca3af; padding: 6px 0;">Your request list is empty. Add custom items above.</p>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>My Shop Location</label>
+                            <select id="retailer-loc">
+                                <option>Kimironko Sector</option>
+                                <option>Nyamirambo Market Block</option>
+                                <option>Gikondo Transit Hub</option>
+                                <option>Kacyiru Center</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery Window</label>
+                            <select id="delivery-window">
+                                <option>06:00 AM - 08:00 AM</option>
+                                <option>09:00 AM - 11:00 AM</option>
+                                <option>02:00 PM - 04:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="checkout-footer">
+                        <div>
+                            <div style="font-size: 11px; color: #6b7280;">Estimated Delivery Service Margin</div>
+                            <div style="font-size: 16px; font-weight: bold; color: #111827;">+ 2,500 RWF</div>
+                        </div>
+                        <button onclick="submitOrder()" class="submit-btn">Confirm Delivery</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERSONA 2: WHOLESALER VIEW -->
+            <div id="wholesaler-view" class="tab-content">
+                <div class="card">
+                    <h3>🏢 Wholesaler Reference Status</h3>
+                    <div class="form-grid" style="grid-template-columns: 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label>Nyabugogo Warehouse Depot ID</label>
+                            <input type="text" value="Kwa Mutangana Depot #4B" disabled style="background:#e5e7eb;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📦 Logged Market Demands</h3>
+</div>
+</div>
+</main>
+</div>
+
+    <script>
+        // Retailer request manifest. The three buttons on this page
+        // (add item, confirm delivery, voice entry) all called functions that
+        // were never written, so the page looked complete but did nothing.
+        // State lives in a plain array; a real deployment would post it to a
+        // backend and the fleet console would read it from there.
+        var requestList = [];
+
+        function renderRequestList() {
+            var container = document.getElementById("cart-items");
+            if (!container) { return; }
+
+            if (requestList.length === 0) {
+                container.innerHTML = '<p style="color:#9ca3af; padding:6px 0;">' +
+                    'Your request list is empty. Add custom items above.</p>';
+                return;
+            }
+
+            var rows = requestList.map(function (item, index) {
+                var notes = item.notes
+                    ? '<div style="font-size:11px; color:#6b7280;">' + item.notes + '</div>'
+                    : '';
+                return '<div style="display:flex; justify-content:space-between; ' +
+                    'align-items:flex-start; padding:8px 0; border-bottom:1px solid #f3f4f6;">' +
+                    '<div><strong>' + item.name + '</strong>' + notes + '</div>' +
+                    '<div style="white-space:nowrap;">' +
+                    '<span style="margin-right:10px;">Qty ' + item.qty + '</span>' +
+                    '<button onclick="removeRequestItem(' + index + ')" ' +
+                    'style="border:none; background:none; color:#dc2626; cursor:pointer;" ' +
+                    'aria-label="Remove ' + item.name + '">&times;</button>' +
+                    '</div></div>';
+            });
+
+            var totalQty = requestList.reduce(function (sum, item) {
+                return sum + item.qty;
+            }, 0);
+
+            container.innerHTML = rows.join('') +
+                '<div style="display:flex; justify-content:space-between; padding-top:8px; ' +
+                'font-weight:bold;"><span>Total units</span><span>' + totalQty + '</span></div>';
+        }
+
+        // Escape text before it goes into innerHTML. Item names come from a text
+        // input, so rendering them unescaped would let a name like
+        // "<img src=x onerror=...>" execute as markup.
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+
+        function addCustomItemToList() {
+            var nameField = document.getElementById("custom-item-name");
+            var qtyField = document.getElementById("custom-item-qty");
+            var notesField = document.getElementById("custom-item-notes");
+
+            var name = (nameField.value || "").trim();
+            var qty = parseInt(qtyField.value, 10);
+
+            if (!name) {
+                alert("Enter an item name first.");
+                nameField.focus();
+                return;
+            }
+            if (!qty || qty < 1) {
+                alert("Quantity must be a whole number of at least 1.");
+                qtyField.focus();
+                return;
+            }
+
+            requestList.push({
+                name: escapeHtml(name),
+                qty: qty,
+                notes: escapeHtml((notesField.value || "").trim())
+            });
+
+            nameField.value = "";
+            qtyField.value = "1";
+            notesField.value = "";
+            nameField.focus();
+
+            renderRequestList();
+        }
+
+        function removeRequestItem(index) {
+            requestList.splice(index, 1);
+            renderRequestList();
+        }
+
+        function submitOrder() {
+            if (requestList.length === 0) {
+                alert("Add at least one item before confirming the delivery request.");
+                return;
+            }
+
+            var location = (document.getElementById("retailer-loc") || {}).value || "unspecified location";
+            var window_ = (document.getElementById("delivery-window") || {}).value || "any time";
+
+            var summary = requestList.map(function (item) {
+                return item.qty + " x " + item.name;
+            }).join(", ");
+
+            // Prototype only: this is the handoff a backend would take. Nothing
+            // is transmitted, so the confirmation says so rather than implying a
+            // real order was placed.
+            alert("Request ready for dispatch.\n\n" +
+                  "Location: " + location + "\n" +
+                  "Window: " + window_ + "\n" +
+                  "Items: " + summary + "\n\n" +
+                  "This is a front-end prototype, so nothing has actually been sent. " +
+                  "The fleet console is where a real order would land.");
+
+            requestList = [];
+            renderRequestList();
+        }
+
+        // Voice entry is offered as an alternative for users who find typing hard.
+        // The Web Speech API is not available everywhere and needs permission, so
+        // this reports honestly instead of pretending to listen.
+        function toggleMic() {
+            var button = document.getElementById("mic-btn");
+            var icon = document.getElementById("mic-icon");
+            var text = document.getElementById("mic-text");
+
+            var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!Recognition) {
+                if (button && button.classList.contains("recording")) {
+                    button.classList.remove("recording");
+                    if (icon) { icon.textContent = "\uD83C\uDFA4"; }
+                    if (text) { text.textContent = "Press to Record Order"; }
+                }
+                alert("Voice input is not supported in this browser. " +
+                      "Type the items into the form above instead.");
+                return;
+            }
+
+            if (button && button.classList.contains("recording")) {
+                button.classList.remove("recording");
+                if (icon) { icon.textContent = "\uD83C\uDFA4"; }
+                if (text) { text.textContent = "Press to Record Order"; }
+                return;
+            }
+
+            if (button) { button.classList.add("recording"); }
+            if (icon) { icon.textContent = "\u23F8"; }
+            if (text) { text.textContent = "Listening..."; }
+
+            var recognition = new Recognition();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+
+            recognition.onresult = function (event) {
+                var transcript = event.results[0][0].transcript;
+                var field = document.getElementById("custom-item-notes");
+                if (field) {
+                    field.value = field.value ? field.value + " " + transcript : transcript;
+                }
+            };
+
+            recognition.onerror = function () {
+                alert("Could not capture audio. Check microphone permission and try again.");
+            };
+
+            recognition.onend = function () {
+                if (button) { button.classList.remove("recording"); }
+                if (icon) { icon.textContent = "\uD83C\uDFA4"; }
+                if (text) { text.textContent = "Press to Record Order"; }
+            };
+
+            recognition.start();
+        }
+
+        renderRequestList();
+    </script>
+</body>
+</html>

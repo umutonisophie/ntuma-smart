@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTUMA SMART - Retailer Hub</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+        .app-frame { max-width: 450px; width: 100%; margin: 0 auto; min-height: 100vh; background-color: #ffffff; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+        header { background-color: #2563eb; color: #ffffff; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        header h1 { font-size: 18px; font-weight: 800; }
+        header p { font-size: 11px; color: #bfdbfe; margin-top: 2px; }
+        .market-badge { background-color: #f59e0b; color: #ffffff; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        main { flex-grow: 1; padding: 16px; display: flex; flex-direction: column; }
+        .workspace-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        .workspace-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+        .info-banner { background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 12px; border-radius: 12px; font-size: 12px; margin-bottom: 16px; line-height: 1.4; }
+        .card-panel { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 16px; }
+        .card-panel h3 { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #1e293b; }
+        .field-group { margin-bottom: 20px; text-align: left; }
+        .field-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+        .input-row-split { display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-bottom: 10px; }
+        input, select, textarea { width: 100%; font-size: 13px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #f8fafc; color: #1e293b; font-family: inherit; }
+        textarea { min-height: 60px; resize: vertical; }
+        .btn { width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-confirm { background-color: #16a34a; }
+        .btn-mic { background-color: #ef4444; padding: 14px; }
+        .btn-mic.active-rec { background-color: #16a34a; }
+        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+        .del-btn { color: #ef4444; background: none; border: none; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .footer-billing { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <div class="app-frame">
+        <header>
+            <div>
+                <h1>NTUMA SMART</h1>
+                <p>No more Nyabugogo trips. We deliver.</p>
+            </div>
+            <div class="market-badge">🏪 Retailer App</div>
+        </header>
+        <main>
+            <div class="workspace-bar">
+                <span class="workspace-title">Procurement Portal</span>
+            </div>
+            <div class="info-banner">📢 Type the items you need. Our truck will locate them inside Nyabugogo!</div>
+            
+            <div class="card-panel">
+                <h3>➕ Add Goods Needed</h3>
+                <div class="input-row-split">
+                    <input type="text" id="add-item-name" placeholder="Item name (e.g., Pakistan Rice, Sugar)">
+                    <input type="number" id="add-item-qty" value="1" min="1">
+                </div>
+                <div class="field-group" style="margin-bottom: 12px;">
+                    <textarea id="add-item-notes" placeholder="Optional notes: Specific packaging sizes or wholesale shop tags..."></textarea>
+                </div>
+                <button class="btn" onclick="insertCustomStockItem()">+ Add Item to Order List</button>
+            </div>
+
+            <div class="card-panel">
+                <h3>🎙️ Alternative: Quick Voice Order</h3>
+                <button id="mic-trigger" class="btn btn-mic" onclick="toggleVoiceLogging()">🎤 Press to Record Order</button>
+            </div>
+
+            <div class="card-panel">
+                <h3>📝 Current Request Manifest</h3>
+                <div id="retailer-list-bin" style="min-height: 40px; margin-bottom: 15px;">
+                    <p style="color: #94a3b8; font-style: italic; font-size: 12px; padding: 6px 0;">Your request list is empty. Add custom items above.</p>
+                </div>
+                <div class="input-row-split" style="grid-template-columns: 1fr 1fr; margin-bottom: 12px;">
+                    <div class="field-group" style="margin-bottom: 0;">
+                        <label style="font-size: 10px; font-weight: bold;">My Shop Location</label>
+                        <select id="retailer-drop-zone">
+                            <option>Kimironko Sector</option>
+                            <option>Nyamirambo Market</option>
+                            <option>Gikondo Transit Hub</option>
+                            <option>Kacyiru Center</option>
+                        </select>
+                    </div>
+                    <div class="field-group" style="margin-bottom: 0;">
+                        <label style="font-size: 10px; font-weight: bold;">Delivery Window</label>
+                        <select id="retailer-drop-time">
+                            <option>06:00 AM - 08:00 AM</option>
+                            <option>09:00 AM - 11:00 AM</option>
+                            <option>02:00 PM - 04:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="footer-billing">
+                    <div>
+                        <span style="font-size: 11px; color: #64748b;">Est. Delivery Service Margin</span>
+                        <div style="font-size: 15px; font-weight: bold; color: #1e293b; margin-top: 2px;">+ 2,500 RWF</div>
+                    </div>
+                    <button class="btn btn-confirm" style="width: auto; padding: 10px 20px;" onclick="dispatchRetailerPayload()">Confirm Delivery</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        var customStockList = [];
+        var vocalOrderQueued = false;
+
+        function insertCustomStockItem() {
+            var nameEl = document.getElementById('add-item-name');
+            var qtyEl = document.getElementById('add-item-qty');
+            var notesEl = document.getElementById('add-item-notes');
+            if (!nameEl.value.trim()) { alert("Please type the name of the goods required."); return; }
+            customStockList.push({ name: nameEl.value.trim(), qty: qtyEl.value, notes: notesEl.value.trim() });
+            nameEl.value = ''; qtyEl.value = '1'; notesEl.value = '';
+            refreshRetailerUI();
+        }
+
+        function refreshRetailerUI() {
+            var container = document.getElementById('retailer-list-bin');
+            if (customStockList.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; font-style: italic; font-size: 12px; padding: 6px 0;">Your request list is empty.</p>';
+                return;
+            }
+            var html = '<div style="display:flex; flex-direction:column; gap:6px;">';
+            for (var i = 0; i < customStockList.length; i++) {
+                var p = customStockList[i];
+                var subNote = p.notes ? '<div style="font-size:11px; color:#64748b; font-style:italic;">' + p.notes + '</div>' : '';
+                html += '<div class="list-row" style="background-color:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;">' +
+                        '<div><strong>' + p.name + '</strong> (x' + p.qty + ')' + subNote + '</div>' +
+                        '<button class="del-btn" onclick="removeStockEntry(' + i + ')">✕</button></div>';
+            }
+            html += '</div>'; container.innerHTML = html;
+        }
+
+        function removeStockEntry(idx) { customStockList.splice(idx, 1); refreshRetailerUI(); }
+
+        function toggleVoiceLogging() {
+            var btn = document.getElementById('mic-trigger');
+            if (!vocalOrderQueued) {
+                vocalOrderQueued = true; btn.className = 'btn btn-mic active-rec'; btn.innerText = "🛑 Recording... Tap to Save";
+            } else {
+                vocalOrderQueued = false; btn.className = 'btn btn-mic'; btn.innerText = "🎤 Press to Record Order";
+                alert("Voice data captured locally.");
+            }
+        }
+
+        function dispatchRetailerPayload() {
+            if (customStockList.length === 0 && !vocalOrderQueued) { alert("Please input an item list first."); return; }
+            localStorage.setItem('retailer_orders', JSON.stringify(customStockList));
+            localStorage.setItem('retailer_voice', vocalOrderQueued);
+            localStorage.setItem('retailer_zone', document.getElementById('retailer-drop-zone').value);
+            localStorage.setItem('retailer_time', document.getElementById('retailer-drop-time').value);
+            alert("Order Submitted to Local Storage Pipeline!");
+            customStockList = []; vocalOrderQueued = false; refreshRetailerUI();
+        }
+    </script>
+</body>
+</html>
